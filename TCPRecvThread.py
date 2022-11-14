@@ -2,9 +2,7 @@
 
 import threading
 import time
-import queue
-import random
-import TCPProto
+
 
 class TCPRecvThread(threading.Thread):
     def __init__(self,maintask):

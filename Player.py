@@ -5,4 +5,4 @@ class Player():
         self.utype=userType
         self.hp=500
         self.mp=70
-    
+        self.updateStatus=None

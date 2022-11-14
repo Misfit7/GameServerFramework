@@ -8,7 +8,7 @@ class ProtoFuncs():
         clients[me] = p
         print(msg)
         # me.transport.write(msg.encode('utf8'))
-        maintask.pushSendMsg(([me.transport],msg.encode('utf8'))) #数组
+        maintask.pushSendMsg(([me],msg.encode('utf8'))) #数组
 
     @staticmethod
     def msgBroadcast(maintask, me, data):
