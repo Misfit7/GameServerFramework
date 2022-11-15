@@ -3,6 +3,7 @@ class ProtoFuncs():
     def login(maintask, me, data):
         clients=maintask.clients
         pMgr=maintask.pMgr
+        pMgr.LoginPlayer(maintask.conn,data)
         msg = data['data']['username'] + ", welcome, you are logged."
         p = pMgr.NewPlayer(data['data']['username'], 1)
         clients[me] = p

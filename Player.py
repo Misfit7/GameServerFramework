@@ -6,3 +6,4 @@ class Player():
         self.hp=500
         self.mp=70
         self.updateStatus=None
+        self.logStatus=False
