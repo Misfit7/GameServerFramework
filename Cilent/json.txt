@@ -7,7 +7,7 @@
 
 {
 "bt":1,
-"lt":3,
+"lt":2,
 "code":0,
 "data":{
 	"username":"zhangsan",
@@ -24,3 +24,4 @@
 	"talked":"zhangsan"
 	}
 }
+# 简化成模板

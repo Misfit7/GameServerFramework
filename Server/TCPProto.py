@@ -20,7 +20,6 @@ class TCPProto(protocol.Protocol):
         x = data.decode("utf8")
         x = json.loads(x)
         print(x['bt'], x['lt'], x['data'])
-        # self.maintask.funcMgr.doProto(self.maintask,self,x)
         self.maintask.pushRecvMsg((self,x))
 
     def connectionLost(self, reason):

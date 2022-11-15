@@ -13,8 +13,8 @@ import DBWriteThread
 class MainTask():
     def __init__(self):
         self.clients={} #连接上来的用户的集合
-        self.pMgr=PlayerMgr.PlayerMgr() #玩家集合
-        self.funcMgr=FuncMgr.FuncMgr() #协议处理函数集合
+        self.pMgr= PlayerMgr.PlayerMgr() #玩家集合
+        self.funcMgr= FuncMgr.FuncMgr() #协议处理函数集合
         self.recvQueue=queue.Queue(1000)
         self.sendQueue=queue.Queue(1000)
         self.conn=self.getConn()
@@ -48,10 +48,18 @@ class MainTask():
 
     # 注册方法
     def regProtoAll(self):
-        self.funcMgr.regProto(1,3,ProtoFuncs.ProtoFuncs.login)
-        self.funcMgr.regProto(2,1,ProtoFuncs.ProtoFuncs.msgBroadcast)
-        self.funcMgr.regProto(2,2,ProtoFuncs.ProtoFuncs.msgPrivateChat)
-        self.funcMgr.regProto(3,1,ProtoFuncs.ProtoFuncs.killLove)
+        # 登陆
+        self.funcMgr.regProto(1, 1, ProtoFuncs.ProtoFuncs.login)
+        # 注册
+        self.funcMgr.regProto(1, 2, ProtoFuncs.ProtoFuncs.register)
+        # 登出
+        self.funcMgr.regProto(1, 3, ProtoFuncs.ProtoFuncs.logout)
+        # 广播
+        self.funcMgr.regProto(2, 1, ProtoFuncs.ProtoFuncs.msgBroadcast)
+        # 私聊
+        self.funcMgr.regProto(2, 2, ProtoFuncs.ProtoFuncs.msgPrivateChat)
+        # 功能
+        self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.killLove)
 
     # 数据库连接
     def getConn(self):
@@ -69,19 +77,17 @@ class MainTask():
     def start(self,port=9999):
         self.regProtoAll()
         # 接收消息线程
-        t1=TCPRecvThread.TCPRecvThread(self)
+        t1= TCPRecvThread.TCPRecvThread(self)
         # 发送消息线程
-        t2=TCPSendThread.TCPSendThread(self)
+        t2= TCPSendThread.TCPSendThread(self)
         # 自动保存线程
-        t3=DBWriteThread.TCPSaveThread(self)
+        t3= DBWriteThread.TCPSaveThread(self)
         t1.start()
         t2.start()
         t3.start()
-        reactor.listenTCP(port,TCPProto.TCPProtoFactory(self))
+        reactor.listenTCP(port, TCPProto.TCPProtoFactory(self))
         reactor.run()
 
 if __name__=="__main__":
     m=MainTask()
     m.start()
-    while True:
-        pass
