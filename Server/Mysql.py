@@ -53,3 +53,21 @@ class GameSql():
             print(ex)
             conn.rollback()
             return 0
+
+    def logout(self, maintask, data):
+        cursor = maintask.conn.cursor()  # 括号内不写参数,数据是元组套元组
+
+        username = data["data"]["username"]
+        s1 = "update playercontent set playercontent=%s where id=%s"
+
+        try:
+            p = maintask.pMgr[username]
+            ps = pickle.dumps(p)
+            p_tuple = (ps, maintask.pMgr[username].id)
+            cursor.execute(s1, p_tuple)
+            maintask.conn.commit()
+            return 1
+        except  Exception as ex:
+            print(ex)
+            maintask.conn.rollback()
+            return 0

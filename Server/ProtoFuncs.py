@@ -1,5 +1,6 @@
 import json
 
+
 class ProtoFuncs():
     @staticmethod
     def login(maintask, me, data):
@@ -9,18 +10,18 @@ class ProtoFuncs():
         # 登陆成功
         if access != 0:
             msg = {
-                "msg":  data['data']['username'] + " 登陆成功，欢迎您。",
-                "status" : 1
+                "msg": data['data']['username'] + " 登陆成功，欢迎您。",
+                "status": 1
             }
             # 生成新角色
-            pMgr[data['data']['username']]=access
-            pMgr[data['data']['username']].logstatus=1
+            pMgr[data['data']['username']] = access
+            pMgr[data['data']['username']].logstatus = 1
             # 玩家角色和用户绑定
             clients[me] = pMgr[data['data']['username']]
         else:
             msg = {
                 "msg": data['data']['username'] + "，对不起，您的账号或密码错误。",
-                "status" : 0
+                "status": 0
             }
         print(msg)
         maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
@@ -29,15 +30,16 @@ class ProtoFuncs():
     def register(maintask, me, data):
         pMgr = maintask.pMgr
         access = pMgr.RegisterPlayer(maintask.conn, data)
+        # 注册成功
         if access == 1:
             msg = {
                 "msg": data['data']['username'] + "，注册成功。",
-                "status" : 0
+                "status": 0
             }
         else:
             msg = {
                 "msg": data['data']['username'] + "，注册失败，您注册的账号已存在或输入有误。",
-                "status" : 0
+                "status": 0
             }
         print(msg)
         maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
@@ -46,22 +48,21 @@ class ProtoFuncs():
     def logout(maintask, me, data):
         clients = maintask.clients
         pMgr = maintask.pMgr
-        access = pMgr.LoginPlayer(maintask.conn, data)
-        # 登陆成功
+        access = pMgr.LogoutPlayer(maintask, data)
+        # 登出成功
         if access != 0:
             msg = {
-                "msg":  data['data']['username'] + " 登陆成功，欢迎您。",
-                "status" : 1
+                "msg": data['data']['username'] + " 退出成功。",
+                "status": 1
             }
-            # 生成新角色
-            pMgr[data['data']['username']]=access
-            pMgr[data['data']['username']].logstatus=1
-            # 玩家角色和用户绑定
-            clients[me] = pMgr[data['data']['username']]
+            # 集合中删除角色
+            del pMgr[data['data']['username']]
+            # 玩家角色和用户解绑
+            clients[me] = None
         else:
             msg = {
-                "msg": data['data']['username'] + "，对不起，您的账号或密码错误。",
-                "status" : 0
+                "msg": data['data']['username'] + "，对不起，请稍后再试。",
+                "status": 0
             }
         print(msg)
         maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
