@@ -1,13 +1,17 @@
 import json
 import socket
+import _thread
+import time
 
 import Menu
 
 # 1.建立连接
-clientConn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+clientTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # 2.连接
-clientConn.connect(('127.0.0.1', 9999))
+clientUDP.connect(('127.0.0.1', 8090))
+clientTCP.connect(('127.0.0.1', 9999))
 
 m = Menu.Menu()
 
@@ -15,31 +19,39 @@ m = Menu.Menu()
 
 # 输入账号密码
 userName = None
-
-msg = {
-    "bt": None,
-    "lt": None,
-    "code": None,
-    "data": {
-    }
-}
+status = 0
 
 
-def sendAndRecv(msg):
+# 发送
+def TCPSendMsg(msg):
     json_str = json.dumps(msg)
     print(json_str)
-    # 发送
-    clientConn.send(json_str.encode(encoding='utf-8'))
-    # 接收
-    data = clientConn.recv(1024)
-    data = json.loads(data)
-    print(data["msg"])
-    return data["status"]
+    clientTCP.send(json_str.encode(encoding='utf-8'))
+    msg.clear()
+
+
+# 接收UDP消息
+def UDPRecvMsg():
+    while True:
+        data, server_add = clientUDP.recvfrom(1024)
+        print('\n' + data.decode('utf8'))
+
+
+# 接收TCP数据
+def TCPRecvData():
+    data = clientTCP.recv(1024)
+    try:
+        data = json.loads(data)
+        print(data["msg"])
+        return data["status"]
+    finally:
+        pass
 
 
 def inputAccount():
     while True:
         global userName
+        msg = {"data": {}}
         userName = input("请输入账号（字母数字）：")
         if not (0 < len(userName.encode("utf8")) <= 24 and userName.isalnum()):
             print("账号输入错误，请重新输入")
@@ -83,50 +95,67 @@ def mainTask():
         # 退出游戏
         elif choice == "3":
             # 关闭连接
-            clientConn.close()
+            clientTCP.close()
             print("已退出游戏")
             return 3
 
         else:
             print("选项输入错误")
             continue
-
-        return sendAndRecv(msg)
+        TCPSendMsg(msg)
+        return TCPRecvData()
 
 
 def secTask():
-    global msg
+    global flag
     print(m.funcMenu)
+    msg = {"data": {}}
     choice = input("请输入选项：").strip()
 
-    #
+    # 广播
     if choice == "1":
-        pass
+        # msg["bt"] = 2
+        # msg["lt"] = 1
+        # msg["data"]["msg"] = "Hello everyone~"
+        # TCPSendMsg(msg)
+        data = input("要说的话：")
+        clientUDP.sendto(data.encode('utf8'), ('127.0.0.1', 8090))
 
-    #
+    # 私聊
     elif choice == "2":
+
         pass
 
-    #
+    # 在线
     elif choice == "3":
         pass
 
-    #
+    # 攻击
     elif choice == "4":
         pass
 
-    #
+    # 退出角色
     elif choice == "5":
+        flag = 0
         msg["bt"] = 1
         msg["lt"] = 3
-        msg["username"] = userName
-        return sendAndRecv(msg)
+        msg["data"]["username"] = userName
+        TCPSendMsg(msg)
+        rec = TCPRecvData()
+        flag = 1
+        return rec
 
 
 if __name__ == '__main__':
+    try:
+        _thread.start_new_thread(UDPRecvMsg, ())
+    except:
+        print("Error: 无法启动线程")
+
     while True:
         status = mainTask()
         if status == 1:
+            flag = 1
             while True:
                 if (secTask() == 1):
                     break

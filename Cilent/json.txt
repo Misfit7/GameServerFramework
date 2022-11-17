@@ -2,7 +2,7 @@
 "bt":2,
 "lt":1,
 "code":0,
-"data":{"msg":"How dare you are"}
+"data":{"msg":"How are you?"}
 }
 
 {

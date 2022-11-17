@@ -1,12 +1,11 @@
-import Player
+from socket import *
 
-class PlayerMgr(dict):
-    def __init__(self):
-        super().__init__()
-        playername="zs"
-        playertype=1
-        p= Player.Player(playername, playertype)
-        self[playername]=p
+client = socket(AF_INET,SOCK_DGRAM)
 
-pmgr=PlayerMgr()
-print(pmgr["zs"].hp)
+if __name__ == '__main__':
+    data = "你好"
+    client.sendto(data.encode('utf8'),('127.0.0.1',8090))
+    data,server_add = client.recvfrom(1024)
+    print(data.decode('utf8'),server_add)
+    while True:
+        pass

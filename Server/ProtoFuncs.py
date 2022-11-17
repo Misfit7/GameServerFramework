@@ -17,6 +17,7 @@ class ProtoFuncs():
             pMgr[data['data']['username']] = access
             pMgr[data['data']['username']].logstatus = 1
             # 玩家角色和用户绑定
+            maintask.waitclients.remove(me)
             clients[me] = pMgr[data['data']['username']]
         else:
             msg = {
@@ -58,7 +59,8 @@ class ProtoFuncs():
             # 集合中删除角色
             del pMgr[data['data']['username']]
             # 玩家角色和用户解绑
-            clients[me] = None
+            del clients[me]
+            maintask.waitclients.add(me)
         else:
             msg = {
                 "msg": data['data']['username'] + "，对不起，请稍后再试。",
@@ -70,11 +72,11 @@ class ProtoFuncs():
     @staticmethod
     def msgBroadcast(maintask, me, data):
         clients = maintask.clients
-        p = clients[me]
-        username = p.uname
-        msg = "%s said to all: %s" % (username, data['data']['msg'])
+        pm = clients[me]
+        username = pm.uname
+        msg = "%s 广播: %s" % (username, data['data']['msg'])
         print(msg)
-        clts = list(clients.values())
+        clts = list(clients.keys())
         maintask.pushSendMsg((clts, msg.encode('utf8')))
 
     @staticmethod
@@ -82,7 +84,7 @@ class ProtoFuncs():
         clients = maintask.clients
         username = clients[me].uname
         takedname = data['data']['talked']
-        for client in clients:
+        for client in list(clients.keys()):
             if clients[client].uname == takedname:
                 msg = "%s said to %s: %s" % (username, takedname, data['data']['msg'])
                 print(msg)

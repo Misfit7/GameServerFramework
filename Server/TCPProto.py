@@ -1,5 +1,4 @@
 import json
-import ProtoFuncs
 
 from twisted.internet import protocol
 
@@ -15,7 +14,7 @@ class TCPProto(protocol.Protocol):
 
         print("remote", remote, remote.host)
         print("local", local)
-        self.maintask.clients[self]=None
+        self.maintask.waitclients.add(self)
         return super().connectionMade()
 
     def dataReceived(self, data):
@@ -26,7 +25,10 @@ class TCPProto(protocol.Protocol):
 
     def connectionLost(self, reason):
         print('client closed', self.transport.getPeer(), reason)
-        del self.maintask.clients[self]
+        if(self in self.maintask.waitclients):
+            self.maintask.waitclients.remove(self)
+        else:
+            del self.maintask.clients[self]
         return super().connectionLost(reason)
 
 
