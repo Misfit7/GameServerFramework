@@ -60,6 +60,7 @@ class ProtoFuncs():
             del pMgr[data['data']['username']]
             # 玩家角色和用户解绑
             del clients[me]
+            del maintask.cips[data['data']['username']]
             maintask.waitclients.add(me)
         else:
             msg = {
@@ -71,30 +72,27 @@ class ProtoFuncs():
 
     @staticmethod
     def msgBroadcast(maintask, me, data):
-        clients = maintask.clients
-        pm = clients[me]
-        username = pm.uname
+        username = data['data']['username']
         msg = "%s 广播: %s" % (username, data['data']['msg'])
         print(msg)
-        clts = list(clients.keys())
-        maintask.pushSendMsg((clts, msg.encode('utf8')))
+        cips = list(maintask.cips.values())
+        maintask.pushSendMsg((me,cips, msg.encode('utf8'),"UDP"))
 
     @staticmethod
     def msgPrivateChat(maintask, me, data):
-        clients = maintask.clients
-        username = clients[me].uname
+        username = data['data']['username']
         takedname = data['data']['talked']
-        for client in list(clients.keys()):
-            if clients[client].uname == takedname:
-                msg = "%s said to %s: %s" % (username, takedname, data['data']['msg'])
+        for name in list(maintask.cips.keys()):
+            if name == takedname:
+                msg = "%s said to %s 悄悄话: %s" % (username, 'you', data['data']['msg'])
                 print(msg)
-                client.transport.write(msg.encode('utf8'))
-            elif client == me:
-                msg = "%s said to %s qiaoqiao_ly: %s" % ('you', takedname, data['data']['msg'])
-                client.transport.write(msg.encode('utf8'))
+                me.transport.write(msg.encode('utf8'),maintask.cips[takedname])
+            elif name == username:
+                msg = "%s said to %s 悄悄话: %s" % ('you', takedname, data['data']['msg'])
+                me.transport.write(msg.encode('utf8'),maintask.cips[username])
 
     @staticmethod
-    def killLove(maintask, me, data):
+    def attack(maintask, me, data):
         clients = maintask.clients
         username = clients[me].uname
         takedname = data['data']['talked']

@@ -2,11 +2,12 @@ import json
 
 from twisted.internet import protocol
 
+
 class TCPProto(protocol.Protocol):
-    def __init__(self,factory):
+    def __init__(self, factory):
         super().__init__()
-        self.factory=factory
-        self.maintask=self.factory.maintask
+        self.factory = factory
+        self.maintask = self.factory.maintask
 
     def connectionMade(self):  # 连接建立
         remote = self.transport.getPeer()  # 获取远端ip
@@ -21,21 +22,26 @@ class TCPProto(protocol.Protocol):
         x = data.decode("utf8")
         x = json.loads(x)
         print(x['bt'], x['lt'], x['data'])
-        self.maintask.pushRecvMsg((self,x))
+        self.maintask.pushRecvMsg((self, x))
 
     def connectionLost(self, reason):
         print('client closed', self.transport.getPeer(), reason)
-        if(self in self.maintask.waitclients):
-            self.maintask.waitclients.remove(self)
-        else:
-            del self.maintask.clients[self]
-        return super().connectionLost(reason)
+        try:
+            del self.maintask.cips[self.maintask.clients[self].uname]
+        finally:
+            try:
+                self.maintask.waitclients.remove(self)
+            finally:
+                try:
+                    del self.maintask.clients[self]
+                finally:
+                    return super().connectionLost(reason)
 
 
 class TCPProtoFactory(protocol.Factory):
-    def __init__(self,maintask):
+    def __init__(self, maintask):
         super().__init__()
-        self.maintask=maintask
+        self.maintask = maintask
 
     def buildProtocol(self, addr):
         return TCPProto(self)

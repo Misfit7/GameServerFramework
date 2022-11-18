@@ -4,7 +4,7 @@ import threading
 import time
 
 
-class TCPRecvThread(threading.Thread):
+class RecvThread(threading.Thread):
     def __init__(self,maintask):
         threading.Thread.__init__(self)        
         self.maintask=maintask

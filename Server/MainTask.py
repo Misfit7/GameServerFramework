@@ -7,8 +7,8 @@ import FuncMgr
 import PlayerMgr
 import ProtoFuncs
 import TCPProto
-import TCPRecvThread
-import TCPSendThread
+import RecvThread
+import SendThread
 import DBWriteThread
 import UDPProto
 
@@ -17,6 +17,7 @@ class MainTask():
     def __init__(self):
         self.waitclients = set()  # 连接上来的用户
         self.clients = {}  # 连接并登陆的用户的集合
+        self.cips = {}  # 用户名及ip
         self.pMgr = PlayerMgr.PlayerMgr()  # 玩家集合
         self.funcMgr = FuncMgr.FuncMgr()  # 协议处理函数集合
         self.recvQueue = queue.Queue(1000)
@@ -62,8 +63,12 @@ class MainTask():
         self.funcMgr.regProto(2, 1, ProtoFuncs.ProtoFuncs.msgBroadcast)
         # 私聊
         self.funcMgr.regProto(2, 2, ProtoFuncs.ProtoFuncs.msgPrivateChat)
-        # 功能
-        self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.killLove)
+        # 攻击
+        self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.attack)
+        # 防御
+        # self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.attack)
+        # 恢复
+        # self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.attack)
 
     # 数据库连接
     def getConn(self):
@@ -78,19 +83,19 @@ class MainTask():
         return conn_obj
 
     # 线程启动
-    def start(self, port=9999):
+    def start(self, portTCP=9999, portUDP=8090):
         self.regProtoAll()
         # 接收消息线程
-        t1 = TCPRecvThread.TCPRecvThread(self)
+        t1 = RecvThread.RecvThread(self)
         # 发送消息线程
-        t2 = TCPSendThread.TCPSendThread(self)
+        t2 = SendThread.SendThread(self)
         # 自动保存线程
         t3 = DBWriteThread.TCPSaveThread(self)
         t1.start()
         t2.start()
         t3.start()
-        reactor.listenUDP(8090, UDPProto.UDPProto())
-        reactor.listenTCP(port, TCPProto.TCPProtoFactory(self))
+        reactor.listenUDP(portUDP, UDPProto.UDPProto(self))
+        reactor.listenTCP(portTCP, TCPProto.TCPProtoFactory(self))
         reactor.run()
 
 

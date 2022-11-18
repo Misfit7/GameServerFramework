@@ -114,25 +114,31 @@ def secTask():
 
     # 广播
     if choice == "1":
-        # msg["bt"] = 2
-        # msg["lt"] = 1
-        # msg["data"]["msg"] = "Hello everyone~"
-        # TCPSendMsg(msg)
-        data = input("要说的话：")
-        clientUDP.sendto(data.encode('utf8'), ('127.0.0.1', 8090))
+        say = input("要说的话：")
+        msg["bt"] = 2
+        msg["lt"] = 1
+        msg["data"]["username"] = userName
+        msg["data"]["msg"] = say
+        clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
 
     # 私聊
     elif choice == "2":
+        talked = input("要私聊的用户名：")
+        say = input("要说的话：")
+        msg["bt"] = 2
+        msg["lt"] = 2
+        msg["data"]["username"] = userName
+        msg["data"]["talked"] = talked
+        msg["data"]["msg"] = say
+        clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
 
-        pass
-
-    # 在线
+    # 在线礼包
     elif choice == "3":
         pass
 
-    # 攻击
+    # 动作
     elif choice == "4":
-        pass
+        thirdMenu()
 
     # 退出角色
     elif choice == "5":
@@ -145,6 +151,21 @@ def secTask():
         flag = 1
         return rec
 
+def thirdMenu():
+    while True:
+        print(m.actMenu)
+        choice = input("请输入选项：").strip()
+        if (choice == '1'):
+            pass
+
+        elif (choice == '2'):
+            pass
+
+        elif (choice == '3'):
+            pass
+
+        elif (choice == '4'):
+            break
 
 if __name__ == '__main__':
     try:
@@ -155,6 +176,10 @@ if __name__ == '__main__':
     while True:
         status = mainTask()
         if status == 1:
+            msg = {"data": {}}
+            msg["data"]["username"] = userName
+            msg["data"]["msg"] = ''
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
             flag = 1
             while True:
                 if (secTask() == 1):
