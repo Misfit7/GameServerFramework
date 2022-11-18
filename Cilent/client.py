@@ -1,4 +1,5 @@
 import json
+import pickle
 import socket
 import _thread
 import time
@@ -27,7 +28,6 @@ def TCPSendMsg(msg):
     json_str = json.dumps(msg)
     print(json_str)
     clientTCP.send(json_str.encode(encoding='utf-8'))
-    msg.clear()
 
 
 # 接收UDP消息
@@ -67,7 +67,6 @@ def inputAccount():
 
 
 def mainTask():
-    global msg
     print(m.mainMenu)
     while True:
         choice = input("请输入选项：").strip()
@@ -123,14 +122,22 @@ def secTask():
 
     # 私聊
     elif choice == "2":
-        talked = input("要私聊的用户名：")
-        say = input("要说的话：")
-        msg["bt"] = 2
-        msg["lt"] = 2
-        msg["data"]["username"] = userName
-        msg["data"]["talked"] = talked
-        msg["data"]["msg"] = say
+        msg["data"]["msg"] = "#@players"
         clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+        msg["data"]["msg"] = None
+        while True:
+            talked = input("要私聊的用户名：")
+            if (talked == userName):
+                print("对象不能为自己")
+                continue
+            say = input("要说的话：")
+            msg["bt"] = 2
+            msg["lt"] = 2
+            msg["data"]["username"] = userName
+            msg["data"]["talked"] = talked
+            msg["data"]["msg"] = say
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+            break
 
     # 在线礼包
     elif choice == "3":
@@ -151,21 +158,44 @@ def secTask():
         flag = 1
         return rec
 
+
 def thirdMenu():
+    msg = {"data": {}}
     while True:
         print(m.actMenu)
         choice = input("请输入选项：").strip()
+
+        # 攻击
         if (choice == '1'):
-            pass
+            msg["data"]["msg"] = "#@players"
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+            msg["data"]["msg"] = None
+            while True:
+                atkname = input("请输入攻击对象：")
+                if (atkname == userName):
+                    print("对象不能为自己")
+                    continue
+                msg["bt"] = 3
+                msg["lt"] = 1
+                msg["data"]["username"] = userName
+                msg["data"]["atked"] = atkname
+                clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+                break
 
+        # 防御
         elif (choice == '2'):
-            pass
+            msg["bt"] = 3
+            msg["lt"] = 2
 
+        # 恢复
         elif (choice == '3'):
-            pass
+            msg["bt"] = 3
+            msg["lt"] = 3
 
+        # 返回
         elif (choice == '4'):
             break
+
 
 if __name__ == '__main__':
     try:

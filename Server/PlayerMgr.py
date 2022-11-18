@@ -24,5 +24,5 @@ class PlayerMgr(dict):
         p = Player.Player(playername, playerType)
         return p
 
-    def SavePlayer(self, playername):
-        pass
+    def SavePlayer(self, maintask, data):
+        self.mq.save(maintask,data)

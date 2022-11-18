@@ -4,14 +4,16 @@ class Player():
         self.uname = username
         self.utype = userType
         self.lv = 1
-        if(userType==1):
+        if (userType == 1):
             self.warrior()
-        elif(userType==2):
+        elif (userType == 2):
             self.witch()
-        elif(userType==3):
+        elif (userType == 3):
             self.assassin()
-        elif(userType==4):
+        elif (userType == 4):
             self.shooter()
+        self.coin = 0
+        self.money = 0
         self.updateStatus = None
         self.logStatus = None
 

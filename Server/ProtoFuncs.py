@@ -4,24 +4,30 @@ import json
 class ProtoFuncs():
     @staticmethod
     def login(maintask, me, data):
-        clients = maintask.clients
-        pMgr = maintask.pMgr
-        access = pMgr.LoginPlayer(maintask.conn, data)
-        # 登陆成功
-        if access != 0:
-            msg = {
-                "msg": data['data']['username'] + " 登陆成功，欢迎您。",
-                "status": 1
-            }
-            # 生成新角色
-            pMgr[data['data']['username']] = access
-            pMgr[data['data']['username']].logstatus = 1
-            # 玩家角色和用户绑定
-            maintask.waitclients.remove(me)
-            clients[me] = pMgr[data['data']['username']]
+        if (data['data']['username'] not in list(maintask.pMgr.keys())):
+            clients = maintask.clients
+            pMgr = maintask.pMgr
+            access = pMgr.LoginPlayer(maintask.conn, data)
+            # 登陆成功
+            if access != 0:
+                msg = {
+                    "msg": data['data']['username'] + " 登陆成功，欢迎您。",
+                    "status": 1
+                }
+                # 生成新角色
+                pMgr[data['data']['username']] = access
+                pMgr[data['data']['username']].logstatus = 1
+                # 玩家角色和用户绑定
+                maintask.waitclients.remove(me)
+                clients[me] = pMgr[data['data']['username']]
+            else:
+                msg = {
+                    "msg": data['data']['username'] + "，对不起，您的账号或密码错误。",
+                    "status": 0
+                }
         else:
             msg = {
-                "msg": data['data']['username'] + "，对不起，您的账号或密码错误。",
+                "msg": data['data']['username'] + "，对不起，账号已登陆。",
                 "status": 0
             }
         print(msg)
@@ -76,32 +82,36 @@ class ProtoFuncs():
         msg = "%s 广播: %s" % (username, data['data']['msg'])
         print(msg)
         cips = list(maintask.cips.values())
-        maintask.pushSendMsg((me,cips, msg.encode('utf8'),"UDP"))
+        maintask.pushSendMsg((me, cips, msg.encode('utf8'), "UDP"))
 
     @staticmethod
     def msgPrivateChat(maintask, me, data):
         username = data['data']['username']
         takedname = data['data']['talked']
-        for name in list(maintask.cips.keys()):
+        for name in maintask.cips:
             if name == takedname:
                 msg = "%s said to %s 悄悄话: %s" % (username, 'you', data['data']['msg'])
                 print(msg)
-                me.transport.write(msg.encode('utf8'),maintask.cips[takedname])
+                me.transport.write(msg.encode('utf8'), maintask.cips[takedname])
             elif name == username:
                 msg = "%s said to %s 悄悄话: %s" % ('you', takedname, data['data']['msg'])
-                me.transport.write(msg.encode('utf8'),maintask.cips[username])
+                print(msg)
+                me.transport.write(msg.encode('utf8'), maintask.cips[username])
 
     @staticmethod
     def attack(maintask, me, data):
-        clients = maintask.clients
-        username = clients[me].uname
-        takedname = data['data']['talked']
-        for client in clients:
-            if clients[client].uname == takedname:
-                clients[client].hp = clients[client].hp + 20
-                msg = "%s like you, add your hp %s points: %s" % (username, 20, data['data']['msg'])
+        username = data['data']['username']
+        atkname = data['data']['atked']
+        pMgr = maintask.pMgr
+        pMgr[atkname].hp = pMgr[atkname].hp - pMgr[username].atk
+        for name in pMgr:
+            if name == atkname:
+                msg = "%s attacked %s once, your hp reduce %s = %s " % (
+                    username, 'you', pMgr[username].atk, pMgr[atkname].hp)
                 print(msg)
-                client.transport.write(msg.encode('utf8'))
-            elif client == me:
-                msg = "%s said to %s qiaoqiao_ly: %s" % ('you', takedname, data['data']['msg'])
-                client.transport.write(msg.encode('utf8'))
+                me.transport.write(msg.encode('utf8'), maintask.cips[atkname])
+            elif name == username:
+                msg = "%s attacked %s once, his hp reduce %s = %s " % (
+                    'you', atkname, pMgr[username].atk, pMgr[atkname].hp)
+                print(msg)
+                me.transport.write(msg.encode('utf8'), maintask.cips[username])
