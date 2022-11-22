@@ -13,10 +13,10 @@ class UDPProto(protocol.DatagramProtocol):
         pass
 
     def datagramReceived(self, data, addr):
-        x = data.decode("utf8")
-        x = json.loads(x)
-        print(x)
         try:
+            x = data.decode("utf8")
+            x = json.loads(x)
+            print(x)
             if (x['data']['msg'] == ''):
                 self.maintask.cips[x['data']['username']] = addr
             elif (x['data']['msg'] == "#@players"):

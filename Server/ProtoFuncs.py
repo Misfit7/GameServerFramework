@@ -1,5 +1,4 @@
 import json
-import pickle
 
 
 class ProtoFuncs():
@@ -104,7 +103,7 @@ class ProtoFuncs():
         username = data['data']['username']
         atkname = data['data']['atked']
         pMgr = maintask.pMgr
-        delta=pMgr[username].atk-pMgr[atkname].df
+        delta = pMgr[username].atk - pMgr[atkname].df
         pMgr[atkname].hp = pMgr[atkname].hp - delta
         if (pMgr[atkname].hp > 0):
             for name in pMgr:

@@ -10,6 +10,7 @@ import RecvThread
 import SendThread
 import DBWriteThread
 import UDPProto
+import Schedule
 
 
 class MainTask():
@@ -22,6 +23,7 @@ class MainTask():
         self.recvQueue = queue.Queue(1000)
         self.sendQueue = queue.Queue(1000)
         self.conn = self.getConn()
+        self.schedule = Schedule.Schedule(self)
 
     # 放入接收消息
     def pushRecvMsg(self, msg):
@@ -84,6 +86,8 @@ class MainTask():
     # 线程启动
     def start(self, portTCP=9999, portUDP=8090):
         self.regProtoAll()
+        # 定时器
+        self.schedule.start()
         # 接收消息线程
         t1 = RecvThread.RecvThread(self)
         # 发送消息线程

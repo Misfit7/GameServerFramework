@@ -1,0 +1,123 @@
+## .gitignore for Grails 1.2 and 1.3
+
+### maven  ###
+target/
+*.releaseBackup
+
+### gradle ###
+gradle
+gradlew
+gradlew.bat
+
+## hack for graddle wrapper
+!wrapper/*.jar
+!**/wrapper/*.jar
+
+### java ###
+classes/
+*.class
+*.war
+*.ear
+ 
+###  ide ### 
+/.classpath
+/.launch
+/.project
+/.settings
+/*.launch
+/*.tmproj
+/ivy*
+/eclipse
+.apt_generated
+.factorypath
+.springBeans
+
+### idea ###
+.idea
+*.iml
+*.ipr
+*.iws
+
+### eclipse ###
+*.pydevproject
+.project
+.cproject
+.metadata
+.buildpath
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+*.launch
+.externalToolBuilders/
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+#dist/
+nbdist/
+.nb-gradle/
+ticket-static/.sass-cache/
+ 
+### hsql 数据库文件 ###
+/prodDb.*
+*Db.properties
+*Db.script
+ 
+### 日志 ###
+/stacktrace.log
+/test/reports
+/logs
+*.log
+*.log.*
+applogo/
+ 
+### 较旧的插件安装位置 ###
+/plugins
+/web-app/plugins
+/web-app/WEB-INF/classes
+ 
+### 临时文件 ###
+target/
+out/
+build/
+
+### windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+ 
+### linux ###
+!.gitignore
+*~
+ 
+## mac ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+.Spotlight-V100
+.Trashes
+
+### npm yarn ###
+node_modules/
+/dist/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn-lock.json
+ 
+# Thumbnails
+._*
+
+### 其他 ###
+*.iws

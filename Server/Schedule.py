@@ -1,25 +1,38 @@
-from datetime import datetime
+import threading
 import time
-from schedule import every, repeat, run_pending,run_all
+import schedule
+import socket
+
+clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-# 此装饰器效果等同于 schedule.every(10).seconds.do(job)
-@repeat(every(300).seconds)
-def job1():
-    print("今日充值活动已开启")
+def job1(cips):
+    msg = "今日充值活动已开启"
+    print(msg)
+    for cip in cips:
+        # print(cips[cip])
+        clientUDP.sendto(msg.encode('utf8'), cips[cip])
+
+# @repeat(every(6).seconds)
+# def job2():
+#     end = datetime.now()
+#     time = int((end - start).seconds/60)
+#     print("您已在线",time,"分钟，金币+10")
+
+# @repeat(every(6).seconds)
+# def job2():
+#     end = datetime.now()
+#     time = int((end - start).seconds/60)
+#     print("您已在线",time,"分钟，金币+10")
 
 
-@repeat(every(60).seconds)
-def job2():
-    end = datetime.now()
-    time = int((end - start).seconds/60)
-    print("您已在线",time,"分钟，金币+10")
+class Schedule(threading.Thread):
+    def __init__(self, maintask):
+        threading.Thread.__init__(self)
+        self.maintask = maintask
 
-
-start = datetime.now()
-
-if __name__ == '__main__':
-    run_all()
-    while True:
-        run_pending()
-        time.sleep(1)
+    def run(self):
+        schedule.every(15).seconds.do(job1, self.maintask.cips)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)

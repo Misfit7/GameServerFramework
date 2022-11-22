@@ -7,12 +7,11 @@ import time
 
 import Menu
 
-# 1.建立连接
-clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-clientTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# 2.连接
-clientUDP.connect(('127.0.0.1', 8090))
+clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# clientUDP.connect(('127.0.0.1', 8090))
+
+clientTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientTCP.connect(('127.0.0.1', 9999))
 
 m = Menu.Menu()
@@ -208,12 +207,14 @@ def thirdMenu():
             break
 
 
-if __name__ == '__main__':
+def newThread():
     try:
         _thread.start_new_thread(UDPRecvMsg, ())
     except:
         print("Error: 无法启动线程")
 
+if __name__ == '__main__':
+    flag=0
     while True:
         status = mainTask()
         if status == 1:
@@ -221,6 +222,9 @@ if __name__ == '__main__':
             msg["data"]["username"] = userName
             msg["data"]["msg"] = ''
             clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+            if (flag==0):
+                newThread()
+                flag=1
             while status == 1:
                 ret = secTask()
                 if (ret == 1):
