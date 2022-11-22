@@ -1,34 +1,30 @@
 #!/usr/bin/python3
 
-import pickle
 import threading
-import time,datetime
+import time
+
 
 # 自动保存
-class TCPSaveThread(threading.Thread):
-    def __init__(self,maintask,spanTime=12000):
-        threading.Thread.__init__(self)        
-        self.maintask=maintask
-        self.spanTime=spanTime
-    
+class SaveThread(threading.Thread):
+    def __init__(self, maintask, spanTime=120):
+        threading.Thread.__init__(self)
+        self.maintask = maintask
+        self.spanTime = spanTime
+
     def run(self):
-        #dtOld=dtNow=datetime.datetime.now()
-        s1="insert into player(pname) values(%s)"
-        s2="insert into playercontent(id, playercontent) values(%s, %s)"
-
         while True:
-            conn= self.maintask.getConn()
-            cursor = conn.cursor()
-            for pItem in self.maintask.pMgr:
-                p=pItem.value()
-                ps=pickle.dumps(p)
-                try:    
-                    cursor.execute(s1,p.uname)
-                    p.id=cursor.lastrowid
-                    d_tuple=(p.id, ps)#pymysql.Binary(ps)
-                    cursor.execute(s2,d_tuple)
-                    conn.commit()
-                except  Exception as ex:
-                    conn.rollback()  
+            pMgr = self.maintask.pMgr
+            for p in list(pMgr.keys()):
+                # print(pMgr[p].uname + ":", pMgr[p].updateStatus)
+                if (pMgr[p].updateStatus == 1):
+                    pMgr.mq.save(self.maintask, p)
+                    pMgr[p].updateStatus = 0
+                    print(p + "自动保存成功")
+                else:
+                    pMgr[p].updateStatus -= 1
+                    if (pMgr[p].updateStatus <= -3):
+                        for c in list(self.maintask.clients.keys()):
+                            if (self.maintask.clients[c] == pMgr[p]):
+                                c.connectionLost(None)
 
-            time.sleep(self.spanTime) #2分钟存一次
+            time.sleep(self.spanTime)  # 2分钟存一次

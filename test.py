@@ -1,4 +1,3 @@
-dic = {"a":123}
-
-if("a" in dic):
+a = {1:2}
+if(2 in a):
     print(True)

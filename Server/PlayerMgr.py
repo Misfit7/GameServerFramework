@@ -24,5 +24,6 @@ class PlayerMgr(dict):
         p = Player.Player(playername, playerType)
         return p
 
+    # 保存玩家对象
     def SavePlayer(self, maintask, data):
         self.mq.save(maintask,data)

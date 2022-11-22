@@ -26,8 +26,9 @@ class TCPProto(protocol.Protocol):
 
     def connectionLost(self, reason):
         print('client closed', self.transport.getPeer(), reason)
-        self.maintask.pMgr.mq.save(self.maintask,self.maintask.clients[self].uname)
         try:
+            self.maintask.pMgr[self.maintask.clients[self].uname].updateStatus=0
+            self.maintask.pMgr.mq.save(self.maintask,self.maintask.clients[self].uname)
             del self.maintask.pMgr[self.maintask.clients[self].uname]
         finally:
             try:

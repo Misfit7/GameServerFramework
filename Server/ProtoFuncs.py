@@ -1,4 +1,5 @@
 import json
+import pickle
 
 
 class ProtoFuncs():
@@ -103,15 +104,62 @@ class ProtoFuncs():
         username = data['data']['username']
         atkname = data['data']['atked']
         pMgr = maintask.pMgr
-        pMgr[atkname].hp = pMgr[atkname].hp - pMgr[username].atk
+        delta=pMgr[username].atk-pMgr[atkname].df
+        pMgr[atkname].hp = pMgr[atkname].hp - delta
+        if (pMgr[atkname].hp > 0):
+            for name in pMgr:
+                if name == atkname:
+                    msg = "%s attacked %s once, your hp reduce %s = %s " % (
+                        username, 'you', delta, pMgr[atkname].hp)
+                    print(msg)
+                    me.transport.write(msg.encode('utf8'), maintask.cips[atkname])
+                elif name == username:
+                    msg = "%s attacked %s once, his hp reduce %s = %s " % (
+                        'you', atkname, delta, pMgr[atkname].hp)
+                    print(msg)
+                    me.transport.write(msg.encode('utf8'), maintask.cips[username])
+        elif (pMgr[atkname].hp <= 0):
+            for name in pMgr:
+                if name == atkname:
+                    msg = "%s killed %s, your hp reduce %s = %s " % (
+                        username, 'you', delta, pMgr[atkname].hp)
+                    print(msg)
+                    me.transport.write(msg.encode('utf8'), maintask.cips[atkname])
+                elif name == username:
+                    msg = "%s killed %s, his hp reduce %s = %s " % (
+                        'you', atkname, delta, pMgr[atkname].hp)
+                    print(msg)
+                    me.transport.write(msg.encode('utf8'), maintask.cips[username])
+            pMgr[atkname].hp = pMgr[atkname].maxhp
+        pMgr[atkname].updateStatus = 1
+
+    @staticmethod
+    def heal(maintask, me, data):
+        username = data['data']['username']
+        atkname = data['data']['atked']
+        pMgr = maintask.pMgr
+        pMgr[atkname].hp = pMgr[atkname].hp + pMgr[username].atk
+        pMgr[username].mp = pMgr[username].mp - 10
+        if (pMgr[atkname].hp > pMgr[atkname].maxhp):
+            pMgr[atkname].hp = pMgr[atkname].maxhp
         for name in pMgr:
             if name == atkname:
-                msg = "%s attacked %s once, your hp reduce %s = %s " % (
+                msg = "%s healed %s once, your hp add %s = %s" % (
                     username, 'you', pMgr[username].atk, pMgr[atkname].hp)
                 print(msg)
                 me.transport.write(msg.encode('utf8'), maintask.cips[atkname])
             elif name == username:
-                msg = "%s attacked %s once, his hp reduce %s = %s " % (
-                    'you', atkname, pMgr[username].atk, pMgr[atkname].hp)
+                msg = "%s healed %s once, his hp add %s = %s, your mp reduce %s = %s" % (
+                    'you', atkname, pMgr[username].atk, pMgr[atkname].hp, 10, pMgr[username].mp)
                 print(msg)
                 me.transport.write(msg.encode('utf8'), maintask.cips[username])
+        pMgr[atkname].updateStatus = 1
+
+    @staticmethod
+    def playerStatus(maintask, me, data):
+        username = data['data']['username']
+        p = maintask.pMgr[username]
+        msg = "your hp = %s/%s, mp =%s/%s, atk=%s, def=%s, lv=%s, type=%s, coin=%s" % (
+            p.hp, p.maxhp, p.mp, p.maxmp, p.atk, p.df, p.lv, p.utype, p.coin
+        )
+        me.transport.write(msg.encode('utf8'), maintask.cips[username])

@@ -1,7 +1,6 @@
 import pymysql
 from twisted.internet import reactor
 import queue
-import socketserver
 
 import FuncMgr
 import PlayerMgr
@@ -65,10 +64,10 @@ class MainTask():
         self.funcMgr.regProto(2, 2, ProtoFuncs.ProtoFuncs.msgPrivateChat)
         # 攻击
         self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.attack)
-        # 防御
-        # self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.attack)
         # 恢复
-        # self.funcMgr.regProto(3, 1, ProtoFuncs.ProtoFuncs.attack)
+        self.funcMgr.regProto(3, 2, ProtoFuncs.ProtoFuncs.heal)
+        # 个人状态
+        self.funcMgr.regProto(3, 3, ProtoFuncs.ProtoFuncs.playerStatus)
 
     # 数据库连接
     def getConn(self):
@@ -90,7 +89,7 @@ class MainTask():
         # 发送消息线程
         t2 = SendThread.SendThread(self)
         # 自动保存线程
-        t3 = DBWriteThread.TCPSaveThread(self)
+        t3 = DBWriteThread.SaveThread(self)
         t1.start()
         t2.start()
         t3.start()

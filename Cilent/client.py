@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 import socket
 import _thread
@@ -34,7 +35,10 @@ def TCPSendMsg(msg):
 def UDPRecvMsg():
     while True:
         data, server_add = clientUDP.recvfrom(1024)
-        print('\n' + data.decode('utf8'))
+        data = data.decode('utf8')
+        print('\n' + data)
+        if (data == "已断开连接，请重新连接"):
+            os._exit(0)
 
 
 # 接收TCP数据
@@ -106,7 +110,6 @@ def mainTask():
 
 
 def secTask():
-    global flag
     print(m.funcMenu)
     msg = {"data": {}}
     choice = input("请输入选项：").strip()
@@ -149,27 +152,25 @@ def secTask():
 
     # 退出角色
     elif choice == "5":
-        flag = 0
         msg["bt"] = 1
         msg["lt"] = 3
         msg["data"]["username"] = userName
         TCPSendMsg(msg)
         rec = TCPRecvData()
-        flag = 1
         return rec
 
 
 def thirdMenu():
-    msg = {"data": {}}
     while True:
+        msg = {"data": {}}
         print(m.actMenu)
         choice = input("请输入选项：").strip()
+        msg["data"]["msg"] = "#@players"
+        clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+        msg["data"]["msg"] = None
 
         # 攻击
         if (choice == '1'):
-            msg["data"]["msg"] = "#@players"
-            clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
-            msg["data"]["msg"] = None
             while True:
                 atkname = input("请输入攻击对象：")
                 if (atkname == userName):
@@ -182,15 +183,25 @@ def thirdMenu():
                 clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
                 break
 
-        # 防御
-        elif (choice == '2'):
-            msg["bt"] = 3
-            msg["lt"] = 2
-
         # 恢复
+        elif (choice == '2'):
+            while True:
+                atkname = input("请输入治疗对象：")
+                msg["bt"] = 3
+                msg["lt"] = 2
+                msg["data"]["username"] = userName
+                msg["data"]["atked"] = atkname
+                clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+                break
+
+        # 状态
         elif (choice == '3'):
-            msg["bt"] = 3
-            msg["lt"] = 3
+            while True:
+                msg["bt"] = 3
+                msg["lt"] = 3
+                msg["data"]["username"] = userName
+                clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+                break
 
         # 返回
         elif (choice == '4'):
@@ -210,9 +221,9 @@ if __name__ == '__main__':
             msg["data"]["username"] = userName
             msg["data"]["msg"] = ''
             clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
-            flag = 1
-            while True:
-                if (secTask() == 1):
+            while status == 1:
+                ret = secTask()
+                if (ret == 1):
                     break
         elif status == 3:
             break
