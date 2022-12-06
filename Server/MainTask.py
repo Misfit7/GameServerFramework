@@ -19,12 +19,14 @@ class MainTask():
         self.waitclients = set()  # 连接上来的用户集合
         self.clients = {}  # 连接并登陆的用户的字典
         self.cips = {}  # 用户名及ip字典
+        self.order = {}  # 订单
         self.pMgr = PlayerMgr.PlayerMgr()  # 玩家集合
         self.funcMgr = FuncMgr.FuncMgr()  # 协议处理函数集合
         self.recvQueue = queue.Queue(1000)
         self.sendQueue = queue.Queue(1000)
         self.conn = self.getConn()
         self.schedule = Schedule.Schedule(self)
+        self.UDP = None
 
     # 放入接收消息
     def pushRecvMsg(self, msg):

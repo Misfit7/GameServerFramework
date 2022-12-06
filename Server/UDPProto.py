@@ -1,5 +1,4 @@
 import json
-import pickle
 
 from twisted.internet import protocol
 
@@ -8,6 +7,8 @@ class UDPProto(protocol.DatagramProtocol):
     def __init__(self, maintask):
         super().__init__()
         self.maintask = maintask
+        self.maintask.UDP = self
+        print(self)
 
     def startProtocol(self):
         pass
@@ -19,6 +20,7 @@ class UDPProto(protocol.DatagramProtocol):
             print(x)
             if (x['data']['msg'] == ''):
                 self.maintask.cips[x['data']['username']] = addr
+                print(addr)
             elif (x['data']['msg'] == "#@players"):
                 players = "当前在线玩家：" + ",".join(list(self.maintask.cips.keys()))
                 self.transport.write(players.encode("utf8"), addr)

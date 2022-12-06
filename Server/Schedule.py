@@ -1,18 +1,18 @@
 import threading
 import time
-from schedule import  every, run_pending
+from schedule import every, run_pending
 from datetime import timedelta
 import socket
 
-clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-
-def job1(cips):
+def job1(maintask):
     msg = "今日充值活动已开启"
     # print(msg)
-    for cip in cips:
+    for cip in maintask.cips:
         # print(cips[cip])
-        clientUDP.sendto(msg.encode('utf8'), cips[cip])
+        maintask.UDP.transport.write(msg.encode('utf8'), maintask.cips[cip])
+
 
 def job2(maintask):
     # 运行任务至某时间
@@ -24,8 +24,8 @@ def job2_1(maintask):
     print(msg)
     for cip in maintask.cips:
         # print(cips[cip])
-        maintask.pMgr[cip].coin+=10
-        clientUDP.sendto(msg.encode('utf8'), maintask.cips[cip])
+        maintask.pMgr[cip].coin += 10
+        maintask.UDP.transport.write(msg.encode('utf8'), maintask.cips[cip])
 
 
 class Schedule(threading.Thread):
@@ -34,8 +34,8 @@ class Schedule(threading.Thread):
         self.maintask = maintask
 
     def run(self):
-        every(60).seconds.do(job1, self.maintask.cips)
-        every().hour.at(":12").do(job2, maintask=self.maintask)
+        every(60).seconds.do(job1, self.maintask)
+        every().minutes.at(":00").do(job2, maintask=self.maintask)
         while True:
             run_pending()
             time.sleep(1)

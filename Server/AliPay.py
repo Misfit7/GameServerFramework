@@ -1,6 +1,7 @@
 import logging
 import random
 import re
+from datetime import datetime
 from urllib import parse
 
 from alipay.aop.api.AlipayClientConfig import AlipayClientConfig
@@ -19,7 +20,7 @@ app_private_key = "MIIEowIBAAKCAQEAiWcbVJ6BfbzvLo8DuPoYq62NSSaMowhDTuJIk9F8gEFKn
 alipay_public_key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvQK9D45PsrXL+noa/1czyjWAHnn0KN5l3b/W7sHwhWZBTK02BPYK7uxWkXM70/qJu0CXpW82G1NZUpl8kLx9d/uYzZ9RIb7zWLiuUre3RwK0hNbNDzBTOQw0yrBwW5KnA5G3aE4N71+b+Zp6mF78MKGsr83Fr1BKyRTorOKik1sh1lP3vTUvwdSmT9xZe93z+rnWB7VjKJiq3tSzdU/mHDCs3HuN4CuYqiz2MjspO3vc2vb8RT0N543qS8s9Oz0yFD73i7UKu0sramnc1XnrcCq7Tcr2UvS5K0akXyboxUP4RDlvTJ4ZCxmxX3kPwco7HW7fD3+JBhKOCoc1rmMEXQIDAQAB"
 
 
-def ali_Pay(id,amount):
+def ali_Pay(id, amount):
     # 实例化客户端
     alipay_client_config = AlipayClientConfig()
     alipay_client_config.server_url = 'https://openapi.alipaydev.com/gateway.do'
@@ -29,21 +30,24 @@ def ali_Pay(id,amount):
     client = DefaultAlipayClient(alipay_client_config, logger)
     # 构造支付模型
     model = AlipayTradeCreateModel()
-    model.out_trade_no = str(random.randrange(100000, 999999))
+    model.out_trade_no = datetime.now().strftime('%Y%m%d%H%M%S') + str(random.randrange(100000, 999999))
     model.total_amount = str(amount)
     model.subject = "充值"
     model.timeout_express = '30m'
     model.product_code = 'FAST_INSTANT_TRADE_PAY'
-    model.buyer_id= str(id)
+    model.buyer_id = str(id)
     request = AlipayTradePagePayRequest(biz_model=model)
-    request.return_url = "http://119.91.27.246:9999"
+    request.return_url = "http://www.baidu.com"
     request.notify_url = "http://119.91.27.246:9999"  # 设置回调通知地址
     response = client.page_execute(request, http_method='GET')  # 获取支付链接
-    return response
+    return (model.out_trade_no, response)
 
 
 def pay_result(res_message):  # 定义处理回调通知的函数
+    out_trade_no = str(re.findall(r"out_trade_no=(.+?)&", res_message)[0])
     total_amount = float(re.findall(r"buyer_pay_amount=(.+?)&", res_message)[0])
-    buyer_id=str(re.findall(r"buyer_id=(.+?)&", res_message)[0])
-    print('支付成功！')
-    return (buyer_id,total_amount)
+    print("订单", out_trade_no, "支付成功！")
+    return (out_trade_no, total_amount)
+
+# if __name__ == '__main__':
+#     print(ali_Pay(123,10))

@@ -8,6 +8,7 @@ class TCPProto(protocol.Protocol):
         super().__init__()
         self.factory = factory
         self.maintask = self.factory.maintask
+        print(self)
 
     def connectionMade(self):  # 连接建立
         remote = self.transport.getPeer()  # 获取远端ip
@@ -20,11 +21,11 @@ class TCPProto(protocol.Protocol):
 
     def dataReceived(self, data):
         x = data.decode("utf8")
+        print(x)
         if 'POST' in x:
             x = {'bt': 4, 'lt': 2, 'data': {'msg': x}}
         else:
             x = json.loads(x)
-        print(x['bt'], x['lt'], x['data'])
         self.maintask.pushRecvMsg((self, x))
 
     def connectionLost(self, reason):
