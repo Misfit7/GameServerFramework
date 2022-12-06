@@ -1,5 +1,6 @@
 import json
 
+import AliPay
 
 class ProtoFuncs():
     @staticmethod
@@ -23,12 +24,12 @@ class ProtoFuncs():
             else:
                 msg = {
                     "msg": data['data']['username'] + "，对不起，您的账号或密码错误。",
-                    "status": 0
+                    "status": 1101
                 }
         else:
             msg = {
                 "msg": data['data']['username'] + "，对不起，账号已登陆。",
-                "status": 0
+                "status": 1102
             }
         print(msg)
         maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
@@ -41,12 +42,12 @@ class ProtoFuncs():
         if access == 1:
             msg = {
                 "msg": data['data']['username'] + "，注册成功。",
-                "status": 0
+                "status": 1201
             }
         else:
             msg = {
                 "msg": data['data']['username'] + "，注册失败，您注册的账号已存在或输入有误。",
-                "status": 0
+                "status": 1202
             }
         print(msg)
         maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
@@ -60,7 +61,7 @@ class ProtoFuncs():
         if access != 0:
             msg = {
                 "msg": data['data']['username'] + " 退出成功。",
-                "status": 1
+                "status": 1301
             }
             # 集合中删除角色
             del pMgr[data['data']['username']]
@@ -71,7 +72,7 @@ class ProtoFuncs():
         else:
             msg = {
                 "msg": data['data']['username'] + "，对不起，请稍后再试。",
-                "status": 0
+                "status": 1302
             }
         print(msg)
         maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
@@ -158,7 +159,74 @@ class ProtoFuncs():
     def playerStatus(maintask, me, data):
         username = data['data']['username']
         p = maintask.pMgr[username]
-        msg = "your hp = %s/%s, mp =%s/%s, atk=%s, def=%s, lv=%s, type=%s, coin=%s" % (
-            p.hp, p.maxhp, p.mp, p.maxmp, p.atk, p.df, p.lv, p.utype, p.coin
+        p.skills = p.lv - p.conskills
+        msg = "your hp=%s/%s, mp=%s/%s, atk=%s, def=%s, lv=%s, skills=%s, type=%s, coin=%s" % (
+            p.hp, p.maxhp, p.mp, p.maxmp, p.atk, p.df, p.lv, p.skills, p.utype, p.coin
         )
         me.transport.write(msg.encode('utf8'), maintask.cips[username])
+
+    @staticmethod
+    def playerSkills(maintask, me, data):
+        username = data['data']['username']
+        p = maintask.pMgr[username]
+        if p.skills > 0:
+            if data['data']['data'] == '1':
+                p.maxhp += 50
+                p.skills -= 1
+                p.conskills+=1
+                msg = "加点成功，最大生命值为%s" % (p.maxhp)
+            elif data['data']['data'] == '2':
+                p.atk += 5
+                p.skills -= 1
+                p.conskills+=1
+                msg = "加点成功，攻击力为%s" % (p.atk)
+            elif data['data']['data'] == '3':
+                p.df += 2
+                p.skills -= 1
+                p.conskills+=1
+                msg = "加点成功，防御值为%s" % (p.df)
+            else:
+                msg = "技能点数不足"
+        else:
+            msg = "技能点数不足"
+        me.transport.write(msg.encode('utf8'), maintask.cips[username])
+
+    @staticmethod
+    def playerMove(maintask, me, data):
+        username = data['data']['username']
+        p = maintask.pMgr[username]
+        if data['data']['msg']== "up":
+            p.location["y"]+=1
+        elif data['data']['msg']== "down":
+            p.location["y"]-=1
+        elif data['data']['msg']== "left":
+            p.location["x"]-=1
+        elif data['data']['msg']== "right":
+            p.location["x"]+=1
+        msg="你向"+data['data']['msg']+"移动了，当前位置："+str(p.location)
+        me.transport.write(msg.encode('utf8'), maintask.cips[username])
+
+    @staticmethod
+    def charge(maintask, me, data):
+        username = data['data']['username']
+        msg = {
+            'msg': AliPay.ali_Pay(username, data['data']['money']),
+            "status": 41001
+        }
+        print(msg)
+        maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组
+
+    @staticmethod
+    def chargeSuccess(maintask, me, data):
+        buyer_id, total_amount = AliPay.pay_result(data['data']['msg'])
+        p = maintask.pMgr[buyer_id]
+        p.money += total_amount
+        msg = {
+            'msg': buyer_id + "恭喜您成功充值余额" + total_amount,
+            "status": 41001
+        }
+        clts = maintask.clients
+        for clt in clts:
+            if clts[clt].uname == buyer_id:
+                me = clt
+        maintask.pushSendMsg(([me], json.dumps(msg).encode("utf8")))  # 数组

@@ -4,15 +4,18 @@ import pickle
 import socket
 import _thread
 import time
+from pynput.keyboard import Key, Listener, Controller
 
 import Menu
 
-
 clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # clientUDP.connect(('127.0.0.1', 8090))
+# UDP = ('127.0.0.1', 8090)
+UDP = ('119.91.27.246', 8090)
 
 clientTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-clientTCP.connect(('127.0.0.1', 9999))
+# clientTCP.connect(('127.0.0.1', 9999))
+clientTCP.connect(('119.91.27.246', 9999))
 
 m = Menu.Menu()
 
@@ -120,12 +123,12 @@ def secTask():
         msg["lt"] = 1
         msg["data"]["username"] = userName
         msg["data"]["msg"] = say
-        clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+        clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
 
     # 私聊
     elif choice == "2":
         msg["data"]["msg"] = "#@players"
-        clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+        clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
         msg["data"]["msg"] = None
         while True:
             talked = input("要私聊的用户名：")
@@ -138,12 +141,18 @@ def secTask():
             msg["data"]["username"] = userName
             msg["data"]["talked"] = talked
             msg["data"]["msg"] = say
-            clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
             break
 
-    # 在线礼包
+    # 充值
     elif choice == "3":
-        pass
+        msg["bt"] = 4
+        msg["lt"] = 1
+        money = input("要充值的金额：")
+        msg["data"]["username"] = userName
+        msg["data"]["money"] = money
+        TCPSendMsg(msg)
+        TCPRecvData()
 
     # 动作
     elif choice == "4":
@@ -165,7 +174,7 @@ def thirdMenu():
         print(m.actMenu)
         choice = input("请输入选项：").strip()
         msg["data"]["msg"] = "#@players"
-        clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+        clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
         msg["data"]["msg"] = None
 
         # 攻击
@@ -179,7 +188,7 @@ def thirdMenu():
                 msg["lt"] = 1
                 msg["data"]["username"] = userName
                 msg["data"]["atked"] = atkname
-                clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+                clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
                 break
 
         # 恢复
@@ -190,21 +199,50 @@ def thirdMenu():
                 msg["lt"] = 2
                 msg["data"]["username"] = userName
                 msg["data"]["atked"] = atkname
-                clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
+                clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
                 break
 
         # 状态
         elif (choice == '3'):
-            while True:
-                msg["bt"] = 3
-                msg["lt"] = 3
-                msg["data"]["username"] = userName
-                clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
-                break
+            msg["bt"] = 3
+            msg["lt"] = 3
+            msg["data"]["username"] = userName
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
+
+        # 加点
+        elif (choice == '4'):
+            msg["bt"] = 3
+            msg["lt"] = 4
+            msg["data"]["username"] = userName
+            msg["data"]["data"] = input("加点方向 1、生命 2、攻击 3、防御：")
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
 
         # 返回
-        elif (choice == '4'):
+        elif (choice == '5'):
             break
+
+
+def on_press(key):
+    msg = {"data": {}}
+    msg["bt"] = 3
+    msg["lt"] = 5
+    msg["data"]["username"] = userName
+    if key == Key.up:
+        msg["data"]["msg"] = "up"
+    elif key == Key.down:
+        msg["data"]["msg"] = "down"
+    elif key == Key.left:
+        msg["data"]["msg"] = "left"
+    elif key == Key.right:
+        msg["data"]["msg"] = "right"
+    elif str(key) == "'t'":
+        return False
+    clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
+
+
+def Move():
+    with Listener(on_press=on_press) as listener:
+        listener.join()
 
 
 def newThread():
@@ -213,21 +251,23 @@ def newThread():
     except:
         print("Error: 无法启动线程")
 
+
 if __name__ == '__main__':
-    flag=0
+    flag = 0
     while True:
         status = mainTask()
         if status == 1:
             msg = {"data": {}}
             msg["data"]["username"] = userName
             msg["data"]["msg"] = ''
-            clientUDP.sendto(json.dumps(msg).encode('utf8'), ('127.0.0.1', 8090))
-            if (flag==0):
+            clientUDP.sendto(json.dumps(msg).encode('utf8'), UDP)
+            if (flag == 0):
                 newThread()
-                flag=1
+                flag = 1
             while status == 1:
+                Move()
                 ret = secTask()
-                if (ret == 1):
+                if (ret == 1301):
                     break
         elif status == 3:
             break

@@ -3,6 +3,9 @@ class Player():
         self.id = None
         self.uname = username
         self.lv = 1
+        self.skills = 1
+        self.conskills = 0
+
         if (userType == 1):
             self.warrior()
             self.utype = "warrior"
@@ -16,7 +19,9 @@ class Player():
             self.shooter()
             self.utype = "shooter"
         self.coin = 0
+        self.money = 0
         self.updateStatus = 0
+        self.location = {"x": 0, "y": 0, "z": 0}
 
     def warrior(self):
         self.maxhp = self.hp = 500
@@ -25,19 +30,19 @@ class Player():
         self.df = 6
 
     def witch(self):
-        self.maxhp =self.hp = 420
-        self.maxmp =self.mp = 100
+        self.maxhp = self.hp = 420
+        self.maxmp = self.mp = 100
         self.atk = 12
         self.df = 3
 
     def assassin(self):
-        self.maxhp =self.hp = 480
-        self.maxmp =self.mp = 60
+        self.maxhp = self.hp = 480
+        self.maxmp = self.mp = 60
         self.atk = 15
         self.df = 3
 
     def shooter(self):
-        self.maxhp =self.hp = 450
-        self.maxmp =self.mp = 65
+        self.maxhp = self.hp = 450
+        self.maxmp = self.mp = 65
         self.atk = 10
         self.df = 4

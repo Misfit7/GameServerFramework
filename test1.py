@@ -1,25 +1,24 @@
-from datetime import datetime
-import time
-from schedule import every, repeat, run_pending,run_all
+from pynput import keyboard
+from pynput.keyboard import Key, Listener,Controller
 
 
-# 此装饰器效果等同于 schedule.every(10).seconds.do(job)
-@repeat(every(300).seconds)
-def job1():
-    print("今日充值活动已开启")
+def on_press(key):
+    if key == Key.up:
+        print('{0} pressed'.format(key))
+    elif key == Key.down:
+        print('{0} pressed'.format(key))
+    elif key == Key.left:
+        print('{0} pressed'.format(key))
+    elif key == Key.right:
+        print('{0} pressed'.format(key))
+    elif str(key) == "'q'":
+        return False
 
 
-@repeat(every(60).seconds)
-def job2():
-    end = datetime.now()
-    time = int((end - start).seconds/60)
-    print("您已在线",time,"分钟，金币+10")
+def Move():
+    with Listener(on_press=on_press) as listener:
+        listener.join()
 
-
-start = datetime.now()
 
 if __name__ == '__main__':
-    run_all()
-    while True:
-        run_pending()
-        time.sleep(1)
+    Move()

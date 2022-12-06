@@ -2,6 +2,7 @@ import pymysql
 from twisted.internet import reactor
 import queue
 
+import BackgroundControl
 import FuncMgr
 import PlayerMgr
 import ProtoFuncs
@@ -70,6 +71,14 @@ class MainTask():
         self.funcMgr.regProto(3, 2, ProtoFuncs.ProtoFuncs.heal)
         # 个人状态
         self.funcMgr.regProto(3, 3, ProtoFuncs.ProtoFuncs.playerStatus)
+        # 加点
+        self.funcMgr.regProto(3, 4, ProtoFuncs.ProtoFuncs.playerSkills)
+        # 移动
+        self.funcMgr.regProto(3, 5, ProtoFuncs.ProtoFuncs.playerMove)
+        # 充值链接
+        self.funcMgr.regProto(4, 1, ProtoFuncs.ProtoFuncs.charge)
+        # 充值成功
+        self.funcMgr.regProto(4, 2, ProtoFuncs.ProtoFuncs.chargeSuccess)
 
     # 数据库连接
     def getConn(self):
@@ -94,9 +103,12 @@ class MainTask():
         t2 = SendThread.SendThread(self)
         # 自动保存线程
         t3 = DBWriteThread.SaveThread(self)
+        # 后台管理线程
+        t4 = BackgroundControl.Control(self)
         t1.start()
         t2.start()
         t3.start()
+        t4.start()
         reactor.listenUDP(portUDP, UDPProto.UDPProto(self))
         reactor.listenTCP(portTCP, TCPProto.TCPProtoFactory(self))
         reactor.run()

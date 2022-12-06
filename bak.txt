@@ -1,30 +1,22 @@
-s1="insert into player(pname) values(%s)"
-        s2="insert into playercontent(id, playercontent) values(%s, %s)"
+request = 'POST / HTTP/1.1\r\nUser-Agent: Mozilla/4.0\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\nHost: 119.91.27.246:9999\r\nContent-Length: 998\r\n\r\ngmt_create=2022-11-30+21%3A13%3A17&charset=utf-8&gmt_payment=2022-11-30+21%3A13%3A32&notify_time=2022-11-30+21%3A13%3A34&subject=test&sign=Bf%2FFKYCUqTFJ4hkDDUZUh9uqEKClOCij51I%2FtVeRyePbPNPfr4rM0iaaHGiknkDBTIgYq4AsnTuGl3Nie0gydhtiwKW7Do%2Brwwa1lxqZEdIbm%2F4gb3GG4GqGzydC5e4mYEEJwB3lT3FNmv%2BsskAXhW%2FXMA9Y7UT%2FLl62W0vcNIzK6jCEp3GRf4CqFcF1Za%2FJVz899UMheERjEYZdLcmuV8dmBzs6Oo0J51MYs0aEZ3K8ySv%2F2AMmHQDNz7Of08GI3ZsUclucU8fS2YSoSO8ByJfzDX9HZ1jJ%2F2cijYmHJcuvYp78kSxyHBjLSrb5IwLdtPVHx0GDh7GQfGCwjiIrsQ%3D%3D&buyer_id=2088722003402077&invoice_amount=18.00&version=1.0&notify_id=2022113000222211333002070521064489&fund_bill_list=%5B%7B%22amount%22%3A%2218.00%22%2C%22fundChannel%22%3A%22ALIPAYACCOUNT%22%7D%5D&notify_type=trade_status_sync&out_trade_no=116136&total_amount=18.00&trade_status=TRADE_SUCCESS&trade_no=2022113022001402070501836699&auth_app_id=2021000121692140&receipt_amount=18.00&point_amount=0.00&app_id=2021000121692140&buyer_pay_amount=18.00&sign_type=RSA2&seller_id=2088621993875952'
+request=parse.unquote(request)
 
-        try:
-            cursor.execute(s1,p.uname)
-            p.id=cursor.lastrowid
-            ps=pickle.dumps(p)
-            d_tuple=(p.id, ps)#pymysql.Binary(ps)
-            cursor.execute(s2,d_tuple)
-            conn.commit()
-        except  Exception as ex:
-            conn.rollback()
+sign = ''
+message = ''
 
-        sql1 = 'select * from playerContent;'  # SQL语句会被高亮显示
-        # 执行SQL语句
-        affect_rows = cursor.execute(sql1)
-        print(affect_rows)  # 执行SQL语句之后受影响的行数
-        # 获取数据
-        # res = cursor.fetchall()  # 获取所有数据
-        res = cursor.fetchone()  # 获取一条数据
-
-        px=res[1] #获得player的二进制
-        p=pickle.loads(px)
-        print(p)
-        # res = cursor.fetchmany(2)  # 获取指定个数数据
-        # cursor.scroll(1, 'relative')  # 相对于当前位置往后移动一个单位
-        # res = cursor.fetchall()  # 获取所有数据
-        # cursor.scroll(1, 'absolute')  # 相对于起始位置往后移动一个单位
-        res1 = cursor.fetchall()  # 获取所有数据
-        print(res, res1)
+data = re.findall(r"\r\n\r\n.*", request)[0][4:]
+data1 = data.split('&')
+for i in sorted(data1):
+    if re.match('sign=', i, re.S):
+        sign = i[5:]
+        continue
+    if "sign_type" in i:
+        continue
+    if
+    k = i + '&'
+    message += k
+message = message.rstrip('&').encode()
+if __name__ == '__main__':
+    print(sign)
+    print(message)
+    print(verify_with_rsa(alipay_public_key.encode('utf-8').decode('utf-8'), message, sign))

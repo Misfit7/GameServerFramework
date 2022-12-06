@@ -20,15 +20,18 @@ class TCPProto(protocol.Protocol):
 
     def dataReceived(self, data):
         x = data.decode("utf8")
-        x = json.loads(x)
+        if 'POST' in x:
+            x = {'bt': 4, 'lt': 2, 'data': {'msg': x}}
+        else:
+            x = json.loads(x)
         print(x['bt'], x['lt'], x['data'])
         self.maintask.pushRecvMsg((self, x))
 
     def connectionLost(self, reason):
         print('client closed', self.transport.getPeer(), reason)
         try:
-            self.maintask.pMgr[self.maintask.clients[self].uname].updateStatus=0
-            self.maintask.pMgr.mq.save(self.maintask,self.maintask.clients[self].uname)
+            self.maintask.pMgr[self.maintask.clients[self].uname].updateStatus = 0
+            self.maintask.pMgr.mq.save(self.maintask, self.maintask.clients[self].uname)
             del self.maintask.pMgr[self.maintask.clients[self].uname]
         finally:
             try:

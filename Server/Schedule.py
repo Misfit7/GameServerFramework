@@ -9,7 +9,7 @@ clientUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def job1(cips):
     msg = "今日充值活动已开启"
-    print(msg)
+    # print(msg)
     for cip in cips:
         # print(cips[cip])
         clientUDP.sendto(msg.encode('utf8'), cips[cip])
@@ -34,7 +34,7 @@ class Schedule(threading.Thread):
         self.maintask = maintask
 
     def run(self):
-        every(15).seconds.do(job1, self.maintask.cips)
+        every(60).seconds.do(job1, self.maintask.cips)
         every().hour.at(":12").do(job2, maintask=self.maintask)
         while True:
             run_pending()
