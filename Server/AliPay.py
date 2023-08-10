@@ -30,15 +30,14 @@ def ali_Pay(id, amount):
     client = DefaultAlipayClient(alipay_client_config, logger)
     # 构造支付模型
     model = AlipayTradeCreateModel()
-    # 订单编号
     model.out_trade_no = datetime.now().strftime('%Y%m%d%H%M%S') + str(random.randrange(100000, 999999))
-    model.total_amount = str(amount)    # 支付金额
-    model.subject = "充值"    # 商品名称
-    model.timeout_express = '30m'   # 链接有效期
+    model.total_amount = str(amount)
+    model.subject = "充值"
+    model.timeout_express = '30m'
     model.product_code = 'FAST_INSTANT_TRADE_PAY'
-    model.buyer_id = str(id)    # 支付者id
+    model.buyer_id = str(id)
     request = AlipayTradePagePayRequest(biz_model=model)
-    request.return_url = "http://www.baidu.com" # 支付成功后跳转
+    request.return_url = "http://www.baidu.com"
     request.notify_url = "http://119.91.27.246:9999"  # 设置回调通知地址
     response = client.page_execute(request, http_method='GET')  # 获取支付链接
     return (model.out_trade_no, response)

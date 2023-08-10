@@ -1,0 +1,27 @@
+{
+"bt":2,
+"lt":1,
+"code":0,
+"data":{"msg":"How are you?"}
+}
+
+{
+"bt":1,
+"lt":2,
+"code":0,
+"data":{
+	"username":"zhangsan",
+	"password":"123"
+	}
+}
+
+{
+"bt":2,
+"lt":2,
+"code":0,
+"data":{
+	"msg":"i like you",
+	"talked":"zhangsan"
+	}
+}
+# 简化成模板

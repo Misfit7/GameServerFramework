@@ -22,10 +22,10 @@ class MainTask():
         self.order = {}  # 订单
         self.pMgr = PlayerMgr.PlayerMgr()  # 玩家集合
         self.funcMgr = FuncMgr.FuncMgr()  # 协议处理函数集合
-        self.recvQueue = queue.Queue(1000)  # 接收队列
-        self.sendQueue = queue.Queue(1000)  # 发送队列
-        self.conn = self.getConn()  # 数据库连接
-        self.schedule = Schedule.Schedule(self) # 任务定时器
+        self.recvQueue = queue.Queue(1000)
+        self.sendQueue = queue.Queue(1000)
+        self.conn = self.getConn()
+        self.schedule = Schedule.Schedule(self)
         self.UDP = None
 
     # 放入接收消息
@@ -85,10 +85,10 @@ class MainTask():
     # 数据库连接
     def getConn(self):
         conn_obj = pymysql.connect(
-            host=' ',  # MySQL服务端的IP地址
+            host='gz-cdb-bhtlu6g1.sql.tencentcdb.com',  # MySQL服务端的IP地址
             port=56807,  # MySQL默认PORT地址(端口号)
-            user=' ',  # 用户名
-            password=' ',  # 密码,也可以简写为passwd
+            user='root',  # 用户名
+            password='xxxrrr123456',  # 密码,也可以简写为passwd
             database='game',  # 库名称,也可以简写为db
             charset='utf8'  # 字符编码
         )

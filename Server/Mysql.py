@@ -83,7 +83,6 @@ class GameSql():
             p_tuple = (ps, maintask.pMgr[username].id)
             cursor.execute(s1, p_tuple)
             maintask.conn.commit()
-            print(username + "自动保存成功")
             return 1
         except  Exception as ex:
             print(ex)

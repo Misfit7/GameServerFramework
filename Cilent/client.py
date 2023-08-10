@@ -27,7 +27,7 @@ status = 0
 # 发送
 def TCPSendMsg(msg):
     json_str = json.dumps(msg)
-    # print(json_str)
+    print(json_str)
     clientTCP.send(json_str.encode(encoding='utf-8'))
 
 
