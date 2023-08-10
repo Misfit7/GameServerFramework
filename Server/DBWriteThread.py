@@ -26,5 +26,4 @@ class SaveThread(threading.Thread):
                         for c in list(self.maintask.clients.keys()):
                             if (self.maintask.clients[c] == pMgr[p]):
                                 c.connectionLost(None)
-
-            time.sleep(self.spanTime)  # 2分钟存一次
+            time.sleep(self.spanTime)  # 2分钟执行一次
