@@ -6,10 +6,10 @@ class ProtoFuncs():
     @staticmethod
     def login(maintask, me, data):
         if (data['data']['username'] not in list(maintask.pMgr.keys())):
+            # 登陆成功
             clients = maintask.clients
             pMgr = maintask.pMgr
             access = pMgr.LoginPlayer(maintask.conn, data)
-            # 登陆成功
             if access != 0:
                 msg = {
                     "msg": data['data']['username'] + " 登陆成功，欢迎您。",

@@ -1,11 +1,11 @@
 class Player():
     def __init__(self, username, userType):
-        self.id = None
-        self.uname = username
-        self.lv = 1
-        self.skills = 1
-        self.conskills = 0
-
+        self.id = None  # ID
+        self.uname = username   # 用户名
+        self.lv = 1 # 等级
+        self.skills = 1 # 技能点
+        self.conskills = 0  # 可用技能点
+        # 不同职业的属性
         if (userType == 1):
             self.warrior()
             self.utype = "warrior"
@@ -18,10 +18,10 @@ class Player():
         elif (userType == 4):
             self.shooter()
             self.utype = "shooter"
-        self.coin = 0
-        self.money = 0
-        self.updateStatus = 0
-        self.location = {"x": 0, "y": 0, "z": 0}
+        self.coin = 0   # 金币
+        self.money = 0  # 充值余额
+        self.updateStatus = 0   # 更新状态
+        self.location = {"x": 0, "y": 0, "z": 0}    # 玩家坐标
 
     def warrior(self):
         self.maxhp = self.hp = 500
